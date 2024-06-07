@@ -1,0 +1,155 @@
+mongo
+
+// 数据库、集合操作
+show dbs;
+use test2_blog;
+show collections;
+db.createCollection("users");
+show collections;
+db.users.renameCollection("staff"); // users -> staff
+show collections;
+db.staff.drop();
+show collections;
+db.dropDatabase();
+show dbs;
+cls;
+
+// 插入、删除、查询操作
+use xxiablog;
+db.createCollection("posts");
+db.posts.insert(
+{
+    title: "我的第一篇博客",
+    content: "已经开始写博客了，太激动了。"
+}
+);
+db.posts.find()
+db.posts.insert(
+{
+    title: "我的第二篇博客",
+    content: "写点什么好呢？",
+    tag: ["未分类"]
+}
+);
+db.posts.find();
+for(var i = 3; i <= 10; i++) {
+    db.posts.insert({
+        title: "我的第" + i + "篇博客"}
+    );
+}
+db.posts.find();
+db.posts.countDocuments();
+db.posts.remove({});
+db.posts.countDocuments();
+
+// 带条件的文档查询
+use xxiablog;
+db.posts.remove({});
+db.posts.insert({title:"怪物猎人世界评测","rank":2,"tag":"game"});
+db.posts.insert({title:"纸片马里奥试玩体验","rank":1,"tag":"game"});
+db.posts.insert({title:"Ubuntu6LTS的安装","rank":3,"tag":"it"});
+db.posts.insert({title:"信长之野望大志销量突破10000","rank":4,"tag":"game"});
+db.posts.insert({title:"Ruby的开发效率真的很高吗","rank":7,"tag":"it"});
+db.posts.insert({title:"塞尔达传说最近出了DLC","rank":4,"tag":"game"});
+db.posts.find({"tag":"game"});
+db.posts.find({"rank":{$gte: 4}});
+db.posts.find({"rank":{$gt: 4}});
+db.posts.find({"rank":{$lte: 4}});
+db.posts.find({"rank":{$lt: 4}});
+db.posts.find({"rank":{$eq: 4}});
+db.posts.find({"rank":{$ne: 4}});
+db.posts.find({"title":/u/});
+db.posts.find({"title":/^R/});
+db.posts.find({"title":/^U/});
+db.posts.distinct("tag")
+db.posts.find({"title": /u/, "rank": {$gte:5}}); // 且
+db.posts.find({$or: [{"title": /u/}, {"rank": {$gte:5}}]}); // 或
+db.posts.find({"rank": {$in: [3,4]}}); // 数值区间
+db.posts.insert({"title": "惊！骑士发生重大交易", "istop": true });
+db.posts.find({"istop": {$exists: true} });
+
+// 指定抽出字段
+db.posts.find({}, {title:true, rank:1}); // 选择 title 和 rank 以及 _id
+db.posts.find({}, {title:true, rank:1, _id:0}); // 选择 title 和 rank
+
+// 文档的方法
+// sort()
+// limit()
+// skip()
+db.posts.find({}, {_id:0}).sort({rank:1}); // 升序
+db.posts.find({}, {_id:0}).sort({rank:-1}); // 降序
+db.posts.find({}, {_id:0}).limit(3); // 只选取前(最早)3条
+db.posts.find({}, {_id:0}).sort({rank:-1}).limit(3); // 只选取前3条
+db.posts.findOne({}, {_id:0});
+db.posts.find({}, {_id:0});
+db.posts.find({}, {_id:0}).limit(3);
+db.posts.find({}, {_id:0}).skip(3).limit(3);
+
+// 文档的更新
+// update(<filter>, <update>, <options>)
+db.posts.findOne({"title": "怪物猎人世界评测"});
+db.posts.update({"title": "怪物猎人世界评测"},{$set: {"rank": 10} });
+db.posts.update({"title": "怪物猎人世界评测"},{"rank": 99});
+db.posts.update({"tag": "it"},{$set: {"rank": 50}}); // 只更新第一个
+db.posts.update({"tag": "it"},{$set: {"rank": 50}}, {multi: true}); // 更新所有
+
+// 特殊函数
+// $inc 递加
+// $mul 相乘
+// $rename 改名
+// $set 新增 或 修改
+// $unset 删除字段
+db.posts.find({title:"怪物猎人世界评测"}, {_id:0});
+db.posts.update({title:"怪物猎人世界评测"}, {$inc:{rank:1}});
+db.posts.find({title:"怪物猎人世界评测"}, {_id:0});
+db.posts.update({title:"怪物猎人世界评测"}, {$mul:{rank:2}});
+db.posts.find({title:"怪物猎人世界评测"}, {_id:0});
+db.posts.update({title:"怪物猎人世界评测"}, {$rename:{"rank":"score"}});
+db.posts.find({title:"怪物猎人世界评测"}, {_id:0});
+db.posts.update({title:"怪物猎人世界评测"}, {$set:{"istop":true}});
+db.posts.find({title:"怪物猎人世界评测"}, {_id:0});
+db.posts.update({title:"怪物猎人世界评测"}, {$unset:{"istop":true}});
+db.posts.find({title:"怪物猎人世界评测"}, {_id:0});
+
+// 文档的特殊更新
+// upsert 有则更新，无则追加
+// remove 删除数据
+db.posts.update({title:"其实创造比大志好玩"}, {$set:{title:"其实创造比大志好玩", "rank": 5, "tag":"game"}});
+db.posts.find({title:"其实创造比大志好玩"}, {_id:0});
+db.posts.update({title:"其实创造比大志好玩"}, {$set:{title:"其实创造比大志好玩", "rank": 5, "tag":"game"}}, {upsert:true});
+db.posts.find({title:"其实创造比大志好玩"}, {_id:0});
+db.posts.update({title:"其实创造比大志好玩"}, {$set:{title:"其实创造比大志好玩", "rank": 7, "tag":"game"}}, {upsert:true});
+db.posts.find({title:"其实创造比大志好玩"}, {_id:0});
+
+// 索引
+// getIndexes()
+// createIndex({...}, {...})
+// dropIndex({...})
+db.posts.getIndexes();
+db.posts.createIndex({rank:-1});
+db.posts.getIndexes();
+db.posts.dropIndex({rank:-1});
+db.posts.getIndexes();
+db.posts.createIndex({title:1}, {unique:true});
+db.posts.getIndexes();
+db.posts.find({title:"怪物猎人世界评测"}, {_id:0});
+db.posts.insert({title:"怪物猎人世界评测"});
+
+// 备份和恢复
+// mongodump        备份
+// mongorestore     恢复
+// mongodump --help 备份帮助
+mongo
+show dbs;
+use xxiablog;
+db.posts.find({}, {_id:0});
+exit
+mkdir dbbak
+cd dbbak
+mongodump -d xxiablog
+mongo xxiablog
+db.posts.find({}, {_id:0});
+db.posts.remove();
+db.posts.find({}, {_id:0});
+exit
+mongorestore --drop
