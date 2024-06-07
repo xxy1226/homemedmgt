@@ -34,16 +34,20 @@ def home(name):
     return render_template('index.html', name=name)
 
 # @app.route('/', methods=['GET'])
-@app.route('/', methods=['POST'])
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    # username = request.args.get('username')
-    # password = request.args.get('password')
-    username = request.form['username']
-    password = request.form['password']
-    if username == "xxia" and password == "123123":
-        return f"<html><body>Welcomd {username}</body></html>"
+    if request.method == 'POST':
+        # username = request.args.get('username')
+        # password = request.args.get('password')
+        username = request.form['username']
+        password = request.form['password']
+        if username == "xxia" and password == "123123":
+            return f"<html><body>Welcomd {username}</body></html>"
+        else:
+            return f"<html><body>Welcome!</body></html>"
     else:
-        return f"<html><body>Welcome!</body></html>"
+        return render_template('index.html')
+
 
 @app.route('/cookie', methods=['GET'])
 def cookie():
